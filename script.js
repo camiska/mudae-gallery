@@ -5,51 +5,50 @@ document.getElementById('displayButton').addEventListener('click', function() {
 
     const lines = input.split('\n');
     lines.forEach(line => {
-        const parts = line.split('. ');
-        if (parts.length === 2) {
-            const caption = parts[0].trim();
-            const originalUrl = parts[1].trim();
-            const isGif = originalUrl.endsWith('.gif');
-            
-            // Determine if we need to modify the URL (for PNGs) or use the original (for GIFs)
-            if (!isGif) {
-                // It's not a GIF, proceed with PNG logic
-                const imageUrlPart = originalUrl.substring(originalUrl.lastIndexOf('~') + 1);
-                const imgurUrl = `https://imgur.com/${imageUrlPart}.png`;
-                const imgchestUrl = `https://cdn.imgchest.com/files/${imageUrlPart}.png`;
+        if (line.includes('. ')) {
+            const [caption, originalUrl] = line.split('. ').map(part => part.trim());
+            const urlParts = originalUrl.split('~');
+            const lastPart = urlParts[urlParts.length - 1];
+            const isGif = lastPart.endsWith('.gif');
 
-                createImageItem(caption, imgurUrl, imgchestUrl);
+            let imageUrl = originalUrl; // Default to the original URL
+
+            if (!isGif) {
+                // If the URL is not a GIF, attempt to construct new URLs for PNG
+                const imgurUrl = `https://imgur.com/${lastPart}`;
+                const imgchestUrl = `https://cdn.imgchest.com/files/${lastPart}`;
+
+                // Initially set imageUrl to imgurUrl and prepare for a possible fallback
+                imageUrl = imgurUrl;
+
+                appendImage(caption, imageUrl, imgchestUrl); // Append and handle fallback if necessary
             } else {
-                // It's a GIF, use the original URL without modification
-                createImageItem(caption, originalUrl);
+                // Directly append GIF without fallback logic
+                appendImage(caption, imageUrl);
             }
         }
     });
 });
 
-function createImageItem(caption, primaryUrl, fallbackUrl = null) {
+function appendImage(caption, imageUrl, fallbackUrl = '') {
     const imageItem = document.createElement('div');
     imageItem.classList.add('image-item');
 
     const img = document.createElement('img');
-    img.src = primaryUrl;
+    img.src = imageUrl;
     img.alt = `Image ${caption}`;
 
-    // Error handling for PNGs with a fallback URL
-    if (fallbackUrl) {
-        img.onerror = () => {
-            console.log(`Primary URL failed for ${caption}, trying fallback.`);
+    img.onerror = () => {
+        if (fallbackUrl) {
+            console.log(`Trying fallback URL for ${caption}.`);
             img.src = fallbackUrl;
-            // Remove the onerror handler to prevent infinite loops
-            img.onerror = () => {
-                console.error(`Both primary and fallback URLs failed for ${caption}.`);
-                img.alt = 'Image failed to load';
-            };
-        };
-    }
+        } else {
+            img.alt = 'Image failed to load';
+        }
+    };
 
     const p = document.createElement('p');
-    p.textContent = `${caption}.`;
+    p.textContent = caption + '.';
 
     imageItem.appendChild(img);
     imageItem.appendChild(p);
