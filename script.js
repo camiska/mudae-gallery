@@ -1,24 +1,21 @@
 document.getElementById('displayButton').addEventListener('click', function() {
     const input = document.getElementById('inputArea').value.trim();
     const gallery = document.getElementById('gallery');
-    gallery.innerHTML = ''; // Clear the gallery before displaying new images
+    gallery.innerHTML = ''; // Clear the gallery
 
     const lines = input.split('\n');
     lines.forEach(line => {
-        // Splitting each line into caption and URL
-        const parts = line.split('. ');
-        if (parts.length === 2) {
-            const caption = parts[0].trim();
-            const url = parts[1].trim();
-            // Creating elements for the image and its caption
+        const [caption, url] = line.split('. ').map(part => part.trim());
+        if (url) {
             const imageItem = document.createElement('div');
             imageItem.classList.add('image-item');
 
             const img = document.createElement('img');
             img.src = url;
             img.alt = `Image ${caption}`;
-            img.onerror = function() { // Handling broken links
-                this.style.display = 'none'; // Hide broken images
+            img.onerror = () => {
+                console.error(`Image ${caption} failed to load.`);
+                imageItem.remove(); // Optionally remove the div if the image fails to load
             };
 
             const p = document.createElement('p');
