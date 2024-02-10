@@ -3,13 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camiska's Mudae Gallery</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Camiska's mudae gallery</title>
+    <style>
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .image-item {
+            margin: 10px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        .image-item.dragging {
+            opacity: 0.5;
+            transform: scale(1.1);
+        }
+    </style>
 </head>
 <body>
-    <textarea id="inputArea" rows="10" cols="50" placeholder="Paste image links here, e.g., 1. https://example.com/image.jpg"></textarea>
+    <textarea id="inputArea" rows="10" cols="50" placeholder="Paste image links here..."></textarea>
     <button id="displayButton">Display Images</button>
+    <button id="arrangeButton">Arrange Images</button>
+    <button id="newOrderButton">New Order</button>
     <div class="gallery" id="gallery"></div>
+    <div id="newOrderList"></div>
 
     <script src="script.js"></script>
 </body>
