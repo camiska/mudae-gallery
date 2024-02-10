@@ -1,4 +1,6 @@
 body {
+    background-color: #121212; /* Dark background */
+    color: #e0e0e0; /* Light text */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -8,14 +10,26 @@ body {
 }
 
 textarea {
+    background-color: #333; /* Darker element background */
+    color: #fff; /* White text */
+    border: 1px solid #555; /* Slightly lighter border for contrast */
     margin-bottom: 20px;
+    padding: 10px;
 }
 
 #displayButton {
+    background-color: #444; /* Dark button background */
+    color: #ddd; /* Light button text */
+    border: none;
     margin-bottom: 20px;
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+#displayButton:hover {
+    background-color: #555; /* Lighter background on hover */
 }
 
 .gallery {
@@ -34,6 +48,7 @@ textarea {
     max-width: 300px;
     height: auto;
     border-radius: 8px;
+    border: 2px solid #333; /* Dark border for images */
 }
 
 p {
