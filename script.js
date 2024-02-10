@@ -11,41 +11,45 @@ document.getElementById('displayButton').addEventListener('click', function() {
             const originalUrl = parts[1].trim();
             const isGif = originalUrl.endsWith('.gif');
 
-            let imageUrl;
-            if (isGif) {
-                // Use the original URL directly for GIFs
-                imageUrl = originalUrl;
-            } else {
-                // Extract the relevant part for PNGs
+            let imageUrl = originalUrl; // Default to using the original URL
+
+            if (!isGif) {
+                // Only modify the URL for non-GIF images
                 const imageUrlPart = originalUrl.substring(originalUrl.lastIndexOf('~') + 1);
-                // Example alternative URLs, modify as needed
-                imageUrl = `https://imgur.com/${imageUrlPart}.png`; // Default to Imgur for PNGs
+                imageUrl = `https://imgur.com/${imageUrlPart}.png`; // Attempt with Imgur for PNGs
+
+                // Prepare for fallback URL in case the primary one fails
+                const fallbackUrl = `https://cdn.imgchest.com/files/${imageUrlPart}.png`;
+
+                // Adjust the onError logic to handle fallback for PNG images
+                const img = document.createElement('img');
+                img.onerror = function() {
+                    console.log(`Primary URL failed for ${caption}, trying fallback.`);
+                    this.src = fallbackUrl;
+                    this.onerror = function() {
+                        console.error(`Both primary and fallback URLs failed for ${caption}.`);
+                        this.alt = 'Image failed to load';
+                    };
+                };
+
+                img.src = imageUrl; // Set the initial source to attempt loading
+            } else {
+                // Directly set the source for GIFs without modification
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = `Image ${caption}`;
+                
+                // Append the image and caption to the gallery
+                const imageItem = document.createElement('div');
+                imageItem.classList.add('image-item');
+
+                const p = document.createElement('p');
+                p.textContent = `${caption}.`;
+
+                imageItem.appendChild(img);
+                imageItem.appendChild(p);
+                gallery.appendChild(imageItem);
             }
-
-            const imageItem = document.createElement('div');
-            imageItem.classList.add('image-item');
-
-            const img = document.createElement('img');
-            img.src = imageUrl;
-            img.alt = `Image ${caption}`;
-
-            // Error handling primarily for PNGs
-            img.onerror = () => {
-                if (!isGif) {
-                    // Attempt alternative source if not a GIF and the first source failed
-                    img.src = `https://cdn.imgchest.com/files/${imageUrlPart}.png`;
-                } else {
-                    console.error(`GIF failed to load from original source for ${caption}.`);
-                    img.alt = 'Image failed to load';
-                }
-            };
-
-            const p = document.createElement('p');
-            p.textContent = `${caption}.`;
-
-            imageItem.appendChild(img);
-            imageItem.appendChild(p);
-            gallery.appendChild(imageItem);
         }
     });
 });
