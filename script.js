@@ -1,15 +1,15 @@
-document.getElementById('displayButton').addEventListener('click', function() {
+document.getElementById('displayButton').addEventListener('click', async function() {
     const input = document.getElementById('inputArea').value.trim();
     const gallery = document.getElementById('gallery');
     gallery.innerHTML = ''; // Clear the gallery before adding new images
 
     const lines = input.split('\n');
     lines.forEach(line => {
-        // Extracting number and URL using a split based on the first occurrence of ". "
-        const firstSpaceIndex = line.indexOf('. ');
-        if (firstSpaceIndex !== -1) {
-            const caption = line.substring(0, firstSpaceIndex);
-            const url = line.substring(firstSpaceIndex + 2).trim();
+        const [caption, originalUrl] = line.split('. ').map(part => part.trim());
+        if (originalUrl) {
+            const imageUrlPart = originalUrl.split('~')[1]; // Extract the unique part of the URL
+            const imgurUrl = `https://imgur.com/${imageUrlPart}.png`;
+            const imgchestUrl = `https://cdn.imgchest.com/files/${imageUrlPart}.png`;
 
             // Creating the container for each image and its caption
             const imageItem = document.createElement('div');
@@ -17,16 +17,24 @@ document.getElementById('displayButton').addEventListener('click', function() {
 
             // Creating the image element
             const img = document.createElement('img');
-            img.src = url;
             img.alt = `Image ${caption}`;
-            img.onerror = function() {
-                console.error(`Image ${caption} at ${url} failed to load.`);
-                this.alt = 'Image failed to load'; // Updating alt text on error
-            };
 
-            // Creating the caption paragraph
             const p = document.createElement('p');
             p.textContent = `${caption}.`;
+
+            // Function to handle loading error and try the next URL
+            img.onerror = function() {
+                if (this.src === imgurUrl) {
+                    console.log(`Imgur URL failed for ${caption}, trying Imgchest.`);
+                    this.src = imgchestUrl;
+                } else {
+                    console.error(`Both URLs failed for ${caption}.`);
+                    this.alt = 'Image failed to load';
+                }
+            };
+
+            // Initially try loading from Imgur
+            img.src = imgurUrl;
 
             // Appending the image and caption to the container, then the container to the gallery
             imageItem.appendChild(img);
